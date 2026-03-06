@@ -1,0 +1,50 @@
+stages:
+  - build
+  - test
+  - regression
+
+build:
+  stage: build
+  tags:
+    - demoRunnerLian
+  script:
+    - cd "$PWD"
+    - echo "Building..."
+    - python3 -m venv venv
+    - source venv/bin/activate
+    - pip3 install -r requirements.txt
+    - playwright install
+    - PWD
+    - ls
+  artifacts:
+    paths:
+      - venv/
+
+test:
+  stage: test
+  tags:
+    - demoRunnerLian
+  script:
+    - echo "Running smoke tests..."
+    - source venv/bin/activate
+    - pytest -v -m "smoke" --html=reports/report.html
+  artifacts:
+    paths:
+      - reports/report.html
+    expire_in: 1 day
+  allow_failure: true
+
+regression_tests:
+  stage: regression
+  tags:
+    - demoRunnerLian
+  script:
+    - echo "Running regression tests..."
+    - source venv/bin/activate
+    - pytest -v -m "regression" --html=reports/report.html
+  artifacts:
+    paths:
+      - reports/report.html
+    expire_in: 1 day
+  when: manual
+  allow_failure: true
